@@ -1,30 +1,31 @@
 import styles from '@/styles/Home.module.css';
 import { Inter } from 'next/font/google';
 import Head from 'next/head';
-import { prove } from "tlsn-js";
+// import { prove } from "tlsn-js";
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
 
-  async function getData() {
+  async function getDefault() {
 
-    // const prove = (await import('tlsn-js')).prove;
+    const { prove, verify } = (await import('tlsn-js'))
 
-    const proof = await prove("https://swapi.dev/api/people/1", {
-      method: "GET",
-      headers: {
-        Connection: "close",
-        Accept: "application/json",
-        "Accept-Encoding": "identity",
-      },
-      body: "",
-      maxTranscriptSize: 20000,
-      notaryUrl: "https://0a05-49-207-214-91.ngrok-free.app",
-      websocketProxyUrl: "ws://notary.efprivacyscaling.org:55688",
+    console.time('prove');
+    const proof = await prove('https://swapi.dev/api/people/1', {
+      method: 'GET',
+      maxTranscriptSize: 16384,
+      notaryUrl: 'http://localhost:7047',
+      websocketProxyUrl: 'ws://0.0.0.0:55688',
     });
+    console.timeEnd('prove');
+    console.log("proof", proof)
 
-    console.log(proof);
+    console.time('verify');
+    const result = await verify(proof);
+    console.timeEnd('verify');
+
+    console.log(result);
   }
 
   return (
@@ -36,7 +37,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <button onClick={getData}>Get</button>
+        <button onClick={getDefault}>Get</button>
       </main>
     </>
   )
